@@ -1,23 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+import './index.css';
+import Nav from './components/Nav';
+import QuizBox from './components/QuizBox'
+import React from "react";
+
 
 function App() {
+
+  const [darkMode, setDarkMode] = React.useState(true);
+
+  function toggleDarkMode() {
+    setDarkMode(prevDarkMode => !prevDarkMode);
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="font-signika">
+      <Nav />
+
+      {/* body */}
+      <div className='flex items-center justify-center'>
+        <QuizBox />
+      </div>
     </div>
   );
 }
