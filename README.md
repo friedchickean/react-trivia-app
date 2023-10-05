@@ -1,8 +1,8 @@
-# Quiz Game
+# Triviago
 
 ## Description
 
-The Quiz Game is an interactive web application that challenges players with trivia questions and allows them to earn points by answering correctly. Players can also use various power-ups to enhance their gameplay experience.
+Triviago is an interactive web application that challenges players with trivia questions and allows them to earn points by answering correctly. Players can also use various power-ups to enhance their gameplay experience.
 
 ## Technologies Used
 
@@ -18,6 +18,7 @@ The Quiz Game is an interactive web application that challenges players with tri
 2. **Answering Questions**: Players will be presented with trivia questions and a list of possible answers. Click on the answer you believe is correct.
 
 3. **Scoring**:
+
    - Correct Answer: You will earn 100 points for each correct answer.
    - Wrong Answer: You will lose 50 points for each incorrect answer.
 
@@ -31,7 +32,7 @@ The Quiz Game is an interactive web application that challenges players with tri
 
 ## Installation and Usage
 
-To run the Quiz Game locally:
+To run Triviago locally:
 
 1. Clone this repository to your local machine using `git clone`.
 
@@ -42,8 +43,9 @@ To run the Quiz Game locally:
    ```bash
    npm install
 
-4. Start the development server:
+   ```
 
+4. Start the development server:
 
 5. Open your web browser and access the game at `http://localhost:3000`.
 
@@ -54,5 +56,3 @@ Contributions are welcome! If you have any suggestions, improvements, or bug fix
 **Acknowledgments**
 
 Special thanks to [Open Trivia Database](https://opentdb.com/) for providing the trivia questions used in this game.
-
-

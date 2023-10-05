@@ -61,7 +61,7 @@ export default function Nav() {
   const fetchQuestion = async () => {
     try {
         const apiUrl = "https://opentdb.com/api.php";
-        const url = `${apiUrl}?amount=1&category=27`;
+        const url = `${apiUrl}?amount=1&category=17`;
 
         const res = await fetch(`${url}`);
         const json = await res.json();
@@ -112,7 +112,8 @@ export default function Nav() {
     setCountdown(countdownDuration);
   };
   
-  // Powerup to skip a question
+  // POWERUP FUNCTIONS
+  // Skip question powerup
   const skipQuestion = () => {
     if (score < 10) {
       console.log("Insufficient funds");
@@ -120,25 +121,32 @@ export default function Nav() {
       console.log("New question");
       fetchQuestion();
     }
+  }
 
-
+  // Remove two wrong answers
+  const fiftyfifty = () => {
+    
   }
 
 
   return (
-    <div className="w-2/3 flex flex-col items-center">
+    <div className="w-11/12 lg:w-2/5 flex flex-col items-center">
       
-      <div className="flex flex-col items-center shadow-[2px_4px_0px_2px_rgba(29,29,29)] bg-white border rounded-md p-10 lg:w-3/5">
+      {/* Quiz box container */}
+      <div className="flex flex-col items-center shadow-[2px_4px_0px_2px_rgba(29,29,29)] bg-white border rounded-md p-10 w-full">
         <div className="px-5 py-2 text-purple-600 text-xl font-bold border-4 border-gray-200 rounded-md" id="quiz-top">
           <p className="absolute ml-11 -mt-4 hidden">test</p>
           <h2>Life: {score}</h2>
         </div>
 
+        {/* Question information */}
         <div className="w-11/12">
+          {/* Question text */}
           <h1 className="mt-3 mb-10 text-xl font-bold text-center" id="question">{question}</h1>
           <h2 className=""></h2>
 
           {(answer == userAnswer) && <Confetti />}
+          {/* Question choices */}
           <ul className="" id="options">
             {choices.map((choice, index) => (
               <li
@@ -150,26 +158,41 @@ export default function Nav() {
                       : userAnswer === choice
                       ? "bg-gray-500 text-white shadow-[2px_4px_0px_2px_rgba(69,69,69)]"
                       : "bg-purple-600 text-white"
-                    : "bg-purple-600 text-white hover:bg-purple-200 hover:text-black hover:scale-105"
-                } w-10/12 py-3 px-5 my-3 mx-auto rounded-md shadow-[2px_4px_0px_2px_rgba(109,40,217)] cursor-pointer active:scale-95 ease-in-out duration-300`}
-                onClick={() => handleChoiceClick(choice, index)}
+                    : "bg-purple-600 text-white hover:bg-purple-200 hover:text-black hover:shadow-[2px_4px_0px_2px_rgba(149,80,257)] hover:scale-105 cursor-pointer active:scale-95"
+                } w-10/12 py-3 px-5 my-3 mx-auto rounded-md shadow-[2px_4px_0px_2px_rgba(109,40,217)] ease-in-out duration-300`}
+                onClick={() => {
+                  if (!showCorrectAnswer) {
+                    handleChoiceClick(choice, index)
+                  }
+                }}
               >
                 {index + 1}. {choice}
               </li>
             ))}
           </ul>
+          {/* Status Bar
           {showCorrectAnswer &&
           <h2>{answer == userAnswer ? "Correct!" : "Wrong!"} New question in {countdown}</h2>
-          }
+          } */}
         </div>
-        <div id="quiz-foot" className="mt-7">
+
+        {/* Footer with quit button */}
+        <div id="quiz-foot" className="mt-7 text-center">
+          <h2>
+            {(countdown > 0) 
+              ? answer == userAnswer 
+                ? "Correct! New question in " + countdown
+                : "Wrong! New question in " + countdown
+              : ""}
+          </h2>
           <button type="button" id="quit" className="text-lg underline">
             Quit
           </button>
         </div>
       </div>
-
-      <div className="flex my-10 gap-10">
+      
+      {/* Powerup Container */}
+      <div className="flex my-5 md:my-10 gap-3 md:gap-10 w-full justify-center">
         <Powerup name="Skip" cost={10} description={"Skip this question and go to the next."} onClick={skipQuestion}/>
         <Powerup name="50/50" cost={20} description={"Remove two wrong answers."} />
         <Powerup name="2x" cost={0} description={"2x point multiplier on the next question"} />
