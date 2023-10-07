@@ -12,8 +12,14 @@ export default function Nav() {
   const [difficulty, setDifficulty] = useState('');
   const [category, setCategory] = useState('');
   const [answer, setAnswer] = useState('');
+  const [correctIndex, setCorrectIndex] = useState('');
   const [choices, setChoices] = useState([]);
   const [countdown, setCountdown] = useState(null);
+
+  // powerup status
+  const [multiplier, setMultiplier] = useState(1);
+  const [add, setAdd] = useState(0);
+  const [removeIndexes, setRemoveIndexes] = useState([]);
 
   // user answer information
   const [score, setScore] = useState(500);
@@ -129,7 +135,6 @@ export default function Nav() {
   };
 
   const difficultyColours = {"easy": "bg-green-400", "medium": "bg-orange-400", "hard": "bg-red-400"};
-  
 
   useEffect(() => {
     fetchQuestion();
@@ -187,11 +192,15 @@ export default function Nav() {
       setCategory(category);
       setChoices(choices);
       setAnswer(correctAnswer);
+      setCorrectIndex(correctIndex);
+      setMultiplier(multiplier + add)
 
       // reset some things
       setShowCorrectAnswer(false);
+      setRemoveIndexes([]);
       setCountdown(null);
       setUserAnswer(null);
+      setAdd(0);
 
     } catch (error) {
       console.error("Error when fetching a question", error);
@@ -208,17 +217,16 @@ export default function Nav() {
 
     if (selectedChoice === answer) {
       // User selected the correct answer
-      setScore(score + 100);
+      setScore(score + (100 * multiplier));
       correctSound.play();
     } else {
-      setScore(score - 50);
+      setScore(score - (50 * multiplier));
       wrongSound.play();
     }
-
     // Show the correct answer and store the user's choice
     setShowCorrectAnswer(true);
     setUserAnswer(selectedChoice);
-
+    setMultiplier(1);
     setCountdown(countdownDuration);
   };
   
@@ -235,9 +243,26 @@ export default function Nav() {
 
   // Remove two wrong answers
   const fiftyfifty = () => {
+    let rem1;
+    let rem2;
+    do {
+      rem1 = Math.floor(Math.random() * 3);
+    } while (rem1 === rem2 || rem1 === correctIndex);
+
+    do {
+      rem2 = Math.floor(Math.random() * 3);
+    } while (rem2 === rem1 || rem2 === correctIndex);
     
+    setScore(score - 20);
+    console.log([rem1, rem2]);
+    setRemoveIndexes([rem1, rem2]);
+
   }
 
+  // multiplier on next round
+  const twoTimes = () => {
+    setAdd(1);
+  }
 
   return (
     <div className="w-11/12 lg:w-2/5 flex flex-col items-center">
@@ -254,27 +279,27 @@ export default function Nav() {
           {/* Question text */}
           <h1 className="my-3 text-xl font-bold text-center" id="question">{question}</h1>
           <div className="flex mb-10 justify-center gap-5">
-            <p className={`px-2 rounded-sm ${categoryStyles[category].bgColour} ${categoryStyles[category].shadow}`}>{category}</p>
+            <p className={`px-2 rounded-sm ${category ? categoryStyles[category].bgColour : ""} ${category ? categoryStyles[category].shadow : ""}`}>{category}</p>
             <p className={`px-2 rounded-sm ${difficultyColours[difficulty]} shadow-[1px_2px_0px_1px_rgba(0,6,7)]`}>{difficulty}</p>
           </div>
 
-          {(answer == userAnswer) && <Confetti />}
+          {(answer === userAnswer) && <Confetti />}
           {/* Question choices */}
           <ul className="" id="options">
             {choices.map((choice, index) => (
               <li
                 key={index}
                 className={`${
-                  showCorrectAnswer
-                    ? choice === answer
+                  showCorrectAnswer || removeIndexes.length > 0
+                    ? choice === answer && showCorrectAnswer
                       ? "bg-green-500 text-white scale-105 active:scale-105 shadow-[2px_4px_0px_2px_rgba(39,79,39)]"
-                      : userAnswer === choice
-                      ? "bg-gray-500 text-white shadow-[2px_4px_0px_2px_rgba(69,69,69)]"
-                      : "bg-purple-600 text-white"
-                    : "bg-purple-600 text-white hover:bg-purple-200 hover:text-black hover:scale-105"
-                } w-10/12 py-3 px-5 my-3 mx-auto rounded-md shadow-[2px_4px_0px_2px_rgba(109,40,217)] cursor-pointer active:scale-95 ease-in-out duration-300`}
+                      : userAnswer === choice || removeIndexes.indexOf(index) >= 0
+                      ? "bg-gray-500 shadow-[2px_4px_0px_2px_rgba(69,69,69)] text-black scale-95"
+                      : "bg-purple-600 text-white hover:bg-purple-200 hover:text-black hover:scale-105 active:scale-95"
+                    : "bg-purple-600 text-white hover:bg-purple-200 hover:text-black hover:scale-105 active:scale-95"
+                } w-10/12 py-3 px-5 my-3 mx-auto rounded-md shadow-[2px_4px_0px_2px_rgba(109,40,217)] cursor-pointer ease-in-out duration-300`}
                 onClick={() => {
-                  if (!showCorrectAnswer) {
+                  if (!showCorrectAnswer && removeIndexes.indexOf(index) === -1) {
                     handleChoiceClick(choice, index)
                   }
                 }}
@@ -293,10 +318,14 @@ export default function Nav() {
         <div id="quiz-foot" className="mt-7 text-center">
           <h2 className="animate-bounce">
             {(countdown > 0) 
-              ? answer == userAnswer 
+              ? answer === userAnswer 
                 ? "Correct! New question in " + countdown
                 : "Wrong! New question in " + countdown
-              : "⠀"}
+              : multiplier > 1
+                ? "2x Multiplier Active"
+                : add > 0
+                  ? "You will gain (or lose) twice as much on the next question! Good luck"
+                  : "⠀"}
           </h2>
           <button type="button" id="quit" className="text-lg underline">
             Quit
@@ -307,8 +336,8 @@ export default function Nav() {
       {/* Powerup Container */}
       <div className="flex my-5 md:my-10 gap-3 md:gap-10 w-full justify-center">
         <Powerup name="Skip" cost={10} description={"Skip this question and go to the next."} onClick={skipQuestion}/>
-        <Powerup name="50/50" cost={20} description={"Remove two wrong answers."} />
-        <Powerup name="2x" cost={0} description={"2x point multiplier on the next question"} />
+        <Powerup name="50/50" cost={20} description={"Remove two wrong answers."} onClick={fiftyfifty}/>
+        <Powerup name="2x" cost={0} description={"2x point multiplier on the next question"} onClick={twoTimes}/>
       </div>
     </div>
     

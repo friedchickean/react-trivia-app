@@ -15,7 +15,6 @@ function App() {
   return (
     <div className="font-signika">
       <Nav />
-
       {/* body */}
       <div className='flex items-center justify-center'>
         <QuizBox />
